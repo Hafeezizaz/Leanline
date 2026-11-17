@@ -1,0 +1,37 @@
+# Python build output and caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets and local config
+.env
+.env.*
+*.pem
+*.key
+
+# Leanline local state (graph DB, run logs)
+.leanline/
+runs.jsonl
+graph.db
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Benchmark scratch output and any local data samples
+benchmarks/results/
+benchmarks/data/
