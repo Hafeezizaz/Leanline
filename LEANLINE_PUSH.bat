@@ -3,7 +3,10 @@ setlocal EnableDelayedExpansion
 cd /d "%~dp0"
 
 rem ---- One-click commit + push for Leanline (https://github.com/Hafeezizaz/Leanline) ----
-rem Safe by design: sets the repo-local identity, never force-pushes, rebases on pull.
+rem Usage:  LEANLINE_PUSH.bat                      -> pushes to main, auto commit message
+rem         LEANLINE_PUSH.bat feature-x            -> pushes to branch feature-x
+rem         LEANLINE_PUSH.bat main "My message"    -> custom commit message
+rem Safe by design: repo-local identity, never force-pushes, rebases on pull.
 
 where git >nul 2>nul
 if errorlevel 1 (
@@ -24,30 +27,30 @@ if not exist ".git" (
 git remote get-url origin >nul 2>nul
 if errorlevel 1 git remote add origin https://Hafeezizaz@github.com/Hafeezizaz/Leanline.git
 
-rem Repo-local identity only (never global, never a work email).
 git config user.name "Hafeez Izaz"
 git config user.email "96226601+Hafeezizaz@users.noreply.github.com"
 for /f "delims=" %%e in ('git config user.email') do echo Committing as: %%e
-echo.
 
 set "BRANCH=main"
-set /p BRANCH=Branch to push [main]:
-if "!BRANCH!"=="" set "BRANCH=main"
+if not "%~1"=="" set "BRANCH=%~1"
 set "CUR="
 for /f "delims=" %%b in ('git branch --show-current') do set "CUR=%%b"
 if /i not "!CUR!"=="!BRANCH!" git checkout -B "!BRANCH!"
+echo Branch: !BRANCH!
 
 git add -A
 git status --short
 echo.
 
-set "MSG="
-set /p MSG=Commit message (imperative, under 72 chars):
+set "MSG=%~2"
 if "!MSG!"=="" (
-  echo No message given - cancelled.
-  pause
-  exit /b 1
+  set "TS="
+  for /f "delims=" %%t in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd-HHmm"') do set "TS=%%t"
+  set "N=0"
+  for /f %%n in ('git diff --cached --name-only ^| find /c /v ""') do set "N=%%n"
+  set "MSG=Update Leanline (!N! files, !TS!)"
 )
+echo Commit message: !MSG!
 
 git diff --cached --quiet
 if errorlevel 1 (
@@ -79,5 +82,5 @@ if errorlevel 1 (
 )
 
 echo.
-echo Done. Open a pull request on GitHub if you pushed a feature branch.
+echo Done: https://github.com/Hafeezizaz/Leanline
 pause
